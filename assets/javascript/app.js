@@ -1,4 +1,5 @@
 // Initialize Firebase
+
 var config = {
   apiKey: "AIzaSyA7kyu2XYjcw0O06JvZiv6U8Q1Dx6Yv588",
   authDomain: "classwork-1dca6.firebaseapp.com",
@@ -23,7 +24,7 @@ $("#train-form").on("submit", function (event) {
   var destinationInput = $("#destination-input").val().trim();
   var firstTrainTimeInput = $("#firstTrain-time").val().trim()
   var frequencyInput = $("#frequency-input").val().trim()
-
+  
   if (!nameInput || !destinationInput || !firstTrainTimeInput || !frequencyInput) {
     return false;
   }
@@ -34,6 +35,7 @@ $("#train-form").on("submit", function (event) {
     firstTrainTime: firstTrainTimeInput,
     frequency: frequencyInput
   });
+  
 
 });
 
@@ -46,6 +48,9 @@ database.ref().on("child_added", function (snapshot) {
   var destination = snapshot.val().destination;
   var firstTrainTime = snapshot.val().firstTrainTime;
   var frequency = snapshot.val().frequency;
+  var keyinFB = snapshot.key;
+  var deleteButton = $("<button>").addClass("btn btn-secondary delete-train")
+
 
   // calculate next arrival time and minutes until arrival 
   // First Time (pushed back 1 year to make sure it comes before current time)
@@ -70,7 +75,9 @@ database.ref().on("child_added", function (snapshot) {
   
   //next arrival time
   var nextArrival = moment().add(minUntil, "minutes").format('hh:mm');
-
+  // Create delete button for display
+  deleteButton.text("Delete");
+  deleteButton.attr("id", keyinFB);
   // Create the new row
   var newRow = $("<tr>").append(
     $("<td>").text(name),
@@ -78,7 +85,8 @@ database.ref().on("child_added", function (snapshot) {
     // $("<td>").text(firstTrainTime),
     $("<td>").text(frequency),
     $("<td>").text(nextArrival),
-    $("<td>").text(minUntil)
+    $("<td>").text(minUntil),
+    $("<td>").append(deleteButton)
 
   );
 
@@ -91,3 +99,19 @@ database.ref().on("child_added", function (snapshot) {
   console.log("Errors handled: " + errorObject.code);
 
 });
+
+$(document).on("click", ".delete-train", function (event) {
+  
+  
+  database.ref($(this).attr("id")).remove();
+ 
+  //alert($(this).attr("id"));
+  
+  $(this).parent().parent('tr').remove();
+  $(this).parent().empty();
+  
+  // $("<tr>").text("deleted!")
+    
+});
+
+
